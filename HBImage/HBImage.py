@@ -41,8 +41,9 @@ class HBImage:
         self._information = dict.fromkeys([
             "filename","filepath","format","size"
         ])
-        # The fit_ratio and fix_offset parameters are used to adjust the difference
-        # in coordinates between the APP window and the memory.
+
+        """The fit_ratio and fix_offset parameters are used to adjust the difference
+        in coordinates between the container and the image size."""
         self._fit_ratio:float = 1.0
         self._fit_offset:tuple = (0, 0)
 
@@ -261,8 +262,9 @@ class HBImage:
 
     def crop(self, box=None):
         """Returns a rectangular region from this image.\n
-        if ROI is set, then crop ROI region, else return self.
-        if box parameter and ROI both set, crop box region.
+        If ROI is set, then crop ROI. 
+        If box parameter and ROI both set, crop box region.
+        Else both are None, return hbimage self.
 
         Args:
             box (tuple(int,int,int,int), optional): The crop rectangle, 
