@@ -1,0 +1,7 @@
+/HBDialogLoad/__pycache__
+/HBImageEditor/__pycache__
+/HBMainWindow/__pycache__
+/HBImage/__pycache__
+__pycache__/
+.vscode/
+HBImageEditor.drawio.svg
