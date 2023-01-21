@@ -220,6 +220,8 @@ class _HBMainWindowMethods:
             new_value = int(new_value)
         except Exception:
             self.hb_album.bookmark = len(self.hb_album)-1
+            self._update(True)
+            return None
 
         self.hb_album.bookmark = new_value-1
         self._update(True)
