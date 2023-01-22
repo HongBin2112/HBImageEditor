@@ -5,7 +5,7 @@ Using inheritance let class "HBImageBoxMethods" functions add to the class "HBIm
 """
 
 from PySide6.QtCore import Signal,QSize,QMimeData
-from PySide6.QtGui import QPixmap,QImage,QUndoStack
+from PySide6.QtGui import QPixmap,QImage,QUndoStack,QMovie
 
 from PySide6.QtWidgets import (
     QLabel,
@@ -102,7 +102,14 @@ class _HBImageBoxMethods:
         q_label.setFixedSize(QSize(*image_original_size))
     
     def _show_gif_image(self, hb_image:'HBImage', q_label:QLabel):
-        pass
+        if hb_image.information["format"]!="gif":
+            return None
+
+        movie = QMovie(hb_image.information["filepath"])
+        q_label.setMovie(movie)
+        movie.start()      
+
+
     
     
     def _show_resized_image(self, hb_image: 'HBImage', q_label: QLabel):
