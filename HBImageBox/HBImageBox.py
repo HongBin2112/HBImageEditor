@@ -238,6 +238,7 @@ class HBImageBox(_HBImageBoxUi, _HBImageBoxMethods):
         super().resizeEvent(event)
         self._set_image_fit_offset()
         self.hide_rubber_band()
+        self.update_image_box()
         return None
 
 

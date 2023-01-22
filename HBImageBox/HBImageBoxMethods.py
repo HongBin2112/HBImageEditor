@@ -31,11 +31,10 @@ def _image_process(process_function):
     def do_process(self):
         if self.is_image_exist is False:
             return None
-        #self._image_process_undo_stack.push(
+
         process_function(self)
-        #)
         self.update_image_box()
-        #print(self._image_process_undo_stack.text())
+
     return do_process
 
 

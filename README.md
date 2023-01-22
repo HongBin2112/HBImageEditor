@@ -29,12 +29,16 @@ HB Image Editor 是一個我自學、入門python，還有Pyside的一個小小�
 透過左上角按鈕可以打開資訊菜單，進行讀取、保存圖片。也可以透過拖拉圖片至視窗中、和剪貼簿貼上來載入圖片。  
 如果讀取一張以上圖片，資訊菜單中 "<", ">" 圖示可用來切換當前處理之圖片。也可以透過直接更改圖片索引（"<"和">"中間顯示的數字），來快速切換圖片。   
    
+<br>
+
 <img src="https://github.com/HongBin2112/HongBin2112/blob/main/figs/HBImageEditor/HBImageEditorAppLoadDialog.png?raw=true" alt="HB Image Editor App Load dialog" width="600">    
   
 點擊Load後會跳出dialog。  
 除了透過點擊 "Selecte File" 來選取圖片，也可以於輸入框中直接輸入本地或非本地路徑（http:// 、 https://）。  
 另外，也可以選取單一.txt文字檔，一次讀取多個檔案路徑。文字檔案內只能有圖片檔案路徑，使用分行來分隔不同檔案路徑。  
 此功能實作上是將.txt中的文字內容讀取並處理後，將其中文字輸入至輸入框中，因此無法於輸入框中直接輸入.txt檔案路徑來做使用，請點擊 "Selecte File" 選項來選取.txt文字檔案。  
+
+<br>
 
 <img src="https://github.com/HongBin2112/HongBin2112/blob/main/figs/HBImageEditor/select_area_and_crop.gif?raw=true" alt="HB Image Editor App select area on image" width="450">   
 
@@ -83,15 +87,23 @@ HB Image Editor 是一個我自學、入門python，還有Pyside的一個小小�
 
 
 
-
-
-
-
-
 ---  
 
 ### Change Log:   
   
+<br>
+
+> ### - Version 1.2.1
+> 
+> #### - Bug fix：  
+> - selecting area fix : After opening/closing information menu and some action that will change image box size, selected area will be wrong.  
+>
+> - edited image index fix : when entering non-int value to change image editing, there were nothing happend.
+> now entering non-int value will set editing image to the last image.
+
+
+<br>   
+
 
 > ### - Version 1.2  
 > - Add Fuction : Undo/Redo :  
@@ -114,7 +126,7 @@ HB Image Editor 是一個我自學、入門python，還有Pyside的一個小小�
   
 
 
-  
+<br>
 
 ---  
   
