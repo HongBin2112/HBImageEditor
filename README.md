@@ -1,9 +1,5 @@
 # HBImageEditor
 
----  
-# HB Image Editor  
-
----  
 
 ### 目錄： 
 - 前言  
