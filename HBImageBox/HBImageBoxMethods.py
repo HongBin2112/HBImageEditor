@@ -4,7 +4,9 @@ This Module defines a class:_HBImageBoxMethods and some the functions that are u
 Using inheritance let class "HBImageBoxMethods" functions add to the class "HBImageBox" .\n
 """
 
-from PySide6.QtCore import Signal,QSize,QMimeData
+from abc import ABC, abstractmethod
+
+from PySide6.QtCore import Signal,QSize,QMimeData,QUrl
 from PySide6.QtGui import QPixmap,QImage,QUndoStack,QMovie
 
 from PySide6.QtWidgets import (
@@ -21,7 +23,8 @@ from .HBImageProcessCommand import (
     CommandCropImage,
     CommandFlipImage,
     CommandColorImage,
-    CommandRotateImage
+    CommandRotateImage,
+    CommandDrawImage
 )
 
 
@@ -39,7 +42,7 @@ def _image_process(process_function):
 
 
 
-class _HBImageBoxMethods:
+class _HBImageBoxMethods():
     """To avoid too much code in HBImageBox, 
     I separate some functions to this module.
     Using inheritance let class "_HBImageBoxMethods"'s functions add to the class "HBImageBox".
@@ -47,7 +50,8 @@ class _HBImageBoxMethods:
     #signal
     image_removed:Signal = ...
     image_loaded:Signal = ...
-
+    image_processed:Signal = ...
+    
     def __init__(self,*args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
@@ -61,22 +65,33 @@ class _HBImageBoxMethods:
 
 
     @property
+    @abstractmethod
     def is_image_exist(self) -> bool:
         ...
 
     @property
+    @abstractmethod
     def display_mode(self) -> str:
         ...
 
+    @property
+    @abstractmethod
+    def draw_color(self) -> tuple:
+        ...
+
+    @abstractmethod
     def update_image_box(self):
         ...
 
+    @abstractmethod
     def update_widgets_enable(self, enable: bool):
         ...
 
+    @abstractmethod
     def show_image(self):
         ...
 
+    @abstractmethod
     def set_image(self, image:'HBImage'):
         ...
 
@@ -97,6 +112,7 @@ class _HBImageBoxMethods:
         """
         pixmap_image = QPixmap(hb_image.to_qt().image)
         image_original_size = hb_image.size
+        self._zoom_scale = 1
 
         q_label.setPixmap(pixmap_image)
         q_label.setFixedSize(QSize(*image_original_size))
@@ -109,8 +125,6 @@ class _HBImageBoxMethods:
         q_label.setMovie(movie)
         movie.start()      
 
-
-    
     
     def _show_resized_image(self, hb_image: 'HBImage', q_label: QLabel):
         """This function will resized the hb_image(copy) to fit q_label's size.
@@ -183,10 +197,21 @@ class _HBImageBoxMethods:
             q_pixmap = QImage(mimeData.imageData())
             clipboard_image = HBImage.load_from_qimage(q_pixmap, **_image_infos)
             is_load_successful = True
-        elif mimeData.hasHtml():
-            pass
+
         elif mimeData.hasText():
-            pass
+            clipboard_text = QUrl(mimeData.text())
+
+            if not clipboard_text.isValid(): 
+                return None
+            
+            #if clipboard_text is url, then try to load it.
+            try:
+                clipboard_image = HBImage(clipboard_text.url())
+                is_load_successful = True
+            except Exception as e:
+                self._show_msg_box("Error!",e)
+            
+
         else:
             raise TypeError("Cannot display data")
         
@@ -236,47 +261,48 @@ class _HBImageBoxMethods:
         self.hb_image_box_label.setFixedSize(QSize(*new_label_size))
 
 
+    def _zoom(self):
+        if not self.is_image_exist:
+            raise AttributeError("There is no image.")
+        
 
+        self._scale_label_size(self.image.size, self.zoom_scale)
+        #self._show_resized_image(self.image, self.hb_image_box_label)
+        self.hide_rubber_band()
+        self.update_image_box()
 
 
 
 
     #----------------------image_process--------------------
+    
+    def _do_image_process(self, command):
+        if self.is_image_exist is False:
+            return None
+        self._image_process_undo_stack.push(command)
+        self.image_processed.emit()
 
     def _crop_image(self):
-        if self.is_image_exist is False:
-            return None
-        self._image_process_undo_stack.push(CommandCropImage(self))
-
+        self._do_image_process(CommandCropImage(self))
 
     def _H_flip_image(self):
-        if self.is_image_exist is False:
-            return None
-        self._image_process_undo_stack.push(CommandFlipImage(self,"H"))
-        
+        self._do_image_process(CommandFlipImage(self,"H"))
 
     def _V_flip_image(self):
-        if self.is_image_exist is False:
-            return None
-        self._image_process_undo_stack.push(CommandFlipImage(self,"V"))
-
-
+        self._do_image_process(CommandFlipImage(self,"V"))
 
     def _gray_image(self):
-        if self.is_image_exist is False:
-            return None
-        self._image_process_undo_stack.push(CommandColorImage(self,"Gray"))
+        self._do_image_process(CommandColorImage(self,"Gray"))
 
     def _color_invert(self):
-        if self.is_image_exist is False:
-            return None
-        self._image_process_undo_stack.push(CommandColorImage(self,"Invert"))
-
+        self._do_image_process(CommandColorImage(self,"Invert"))
 
     def _rotate_90_image(self):
-        if self.is_image_exist is False:
-            return None
-        self._image_process_undo_stack.push(CommandRotateImage(self,90))
+        self._do_image_process(CommandRotateImage(self,90))
+
+    def _draw_rect(self):
+        self._do_image_process(CommandDrawImage(self,"Rect",self.draw_color))
+
         
         
 

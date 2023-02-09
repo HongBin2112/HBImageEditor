@@ -32,6 +32,7 @@ class HBImageBox(_HBImageBoxUi, _HBImageBoxMethods):
     #signal
     image_removed:Signal = Signal()
     image_loaded:Signal = Signal()
+    image_processed:Signal = Signal()
 
     def __init__(self, parent:QWidget=None) -> None:
         super().__init__(parent)
@@ -40,6 +41,7 @@ class HBImageBox(_HBImageBoxUi, _HBImageBoxMethods):
         #display_mode:["original_size", "gif", "zoom"]
         self._display_mode = "original_size"
         self._zoom_scale = 1
+        self._draw_color = (0,0,255)
         self._image_process_undo_stack = QUndoStack()
         self._image_process_undo_stack.setUndoLimit(10)
         #print(self._image_process_undo_stack.canUndo())
@@ -54,6 +56,15 @@ class HBImageBox(_HBImageBoxUi, _HBImageBoxMethods):
     @property
     def display_mode(self) -> str:
         return self._display_mode
+
+    @property
+    def draw_color(self) -> tuple:
+        return self._draw_color
+    
+    @draw_color.setter
+    def draw_color(self, value):
+        
+        self._draw_color = value
 
     @property
     def zoom_scale(self) -> float:
@@ -88,6 +99,7 @@ class HBImageBox(_HBImageBoxUi, _HBImageBoxMethods):
         self.actionGray.triggered.connect(self._gray_image)
         self.actionInvert.triggered.connect(self._color_invert)
         self.actionRotate_90.triggered.connect(self._rotate_90_image)
+        self.actionDrawRect.triggered.connect(self._draw_rect)
 
         self.actionUndo.triggered.connect(self._image_process_undo_stack.undo)
         self.actionRedo.triggered.connect(self._image_process_undo_stack.redo)
@@ -204,9 +216,10 @@ class HBImageBox(_HBImageBoxUi, _HBImageBoxMethods):
             elif wheel_angle<0:
                 self._zoom_scale = 0.1 if (self._zoom_scale<=0.2) else (self._zoom_scale - 0.1)
                 
-            self._scale_label_size(self.image.size, self.zoom_scale)
+            self._zoom()
+            """ self._scale_label_size(self.image.size, self.zoom_scale)
             self.hide_rubber_band()
-            self.update_image_box()
+            self.update_image_box() """
 
         else:
             super(QScrollArea,self.scroll_area).wheelEvent(event)

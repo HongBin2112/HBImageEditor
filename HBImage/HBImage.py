@@ -284,6 +284,8 @@ class HBImage:
     def draw_rect(self, rect=None, fill_color=None, outline_color="blue", outline_width=1):
         if rect is None:
             rect = self.ROI
+        if self.is_ROI_empty:
+            return None
         draw = ImageDraw.Draw(self.image)
         draw.rectangle(rect, fill_color, outline_color, outline_width)
 

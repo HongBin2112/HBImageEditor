@@ -93,6 +93,18 @@ HB Image Editor 是一個我自學、入門python，還有Pyside的一個小小�
   
 <br>
 
+> ### - Version 1.2.2
+> 
+> - Add Fuction : draw rectangle. there is only 1 type you can draw now, a rectangle box with blue outline. More type and custom color will be added in future.
+> 
+> - Paste : If clipboard has text not image, it will try to load image by using the text as a image url.
+> 
+> - arrange "HBImageBoxMethods.py" code.
+> 
+
+  
+<br>
+
 > ### - Version 1.2.1
 > 
 > #### - Bug fix：  

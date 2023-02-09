@@ -68,6 +68,8 @@ class HBMainWindow(QMainWindow, _HBMainWindowMethods):
         """
         self.ui.hb_image_box.image_removed.connect(self._remove_image)
         self.ui.hb_image_box.image_loaded.connect(self._add_image)
+        self.ui.hb_image_box.image_processed.connect(self._update_label_image_info)
+        
 
         self.ui.widgetWindowMove.mousePressEvent = self._move_window_mouse_press
         self.ui.widgetWindowMove.mouseMoveEvent = self._move_window_mouse_move

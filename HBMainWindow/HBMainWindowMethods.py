@@ -148,6 +148,7 @@ class _HBMainWindowMethods:
             else:
                 temp_album = HBAlbum(filepaths)
                 self.hb_album.merge(temp_album)
+                self.hb_album.bookmark = len(self.hb_album)-1
             self._update(True)
         except Exception as e:
             self.ui.hb_image_box._show_msg_box('Error!', e)

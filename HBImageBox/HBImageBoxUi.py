@@ -43,6 +43,7 @@ class _HBImageBoxUi(QWidget):
         self.add_actions()
         self.set_actions()
         self.set_widgets()
+        self.set_menus()
 
 
 
@@ -62,6 +63,7 @@ class _HBImageBoxUi(QWidget):
         self.menu_edit = QMenu(self.menu_processor)
         self.menu_flip = QMenu(self.menu_edit)
         self.menu_color = QMenu(self.menu_edit)
+        self.menu_draw = QMenu(self.menu_edit)
 
 
     def add_actions(self):
@@ -107,6 +109,9 @@ class _HBImageBoxUi(QWidget):
         
         self.actionSave = QAction("Save", self)
         self.actionSave.setObjectName(u"actionSave")
+        
+        self.actionDrawRect = QAction("Rect", self)
+        self.actionDrawRect.setObjectName(u"actionDrawRect")        
 
 
     def set_actions(self):
@@ -158,6 +163,7 @@ class _HBImageBoxUi(QWidget):
         self.hb_image_box_label.setMinimumSize(QSize(300, 120))
         self.hb_image_box_label.setAlignment(Qt.AlignCenter)
         
+    def set_menus(self):
         self.menu_flip.setObjectName(u"menuFlip")
         self.menu_flip.addAction(self.actionHorizontal)
         self.menu_flip.addAction(self.actionVertical)
@@ -165,7 +171,9 @@ class _HBImageBoxUi(QWidget):
         self.menu_color.setObjectName(u"menuColor")
         self.menu_color.addAction(self.actionGray)
         self.menu_color.addAction(self.actionInvert)
-
+        
+        self.menu_draw.setObjectName(u"menuDraw")
+        self.menu_draw.addAction(self.actionDrawRect)
         
 
         self.menu_edit.setObjectName(u"menuEdit")
@@ -175,6 +183,7 @@ class _HBImageBoxUi(QWidget):
             self.actionCrop,
             self.actionRotate_90,
             self.menu_color.menuAction(),
+            self.menu_draw.menuAction(),
             self.menu_flip.menuAction()
         ])
         self.menu_edit.addSeparator()
@@ -184,9 +193,11 @@ class _HBImageBoxUi(QWidget):
         ])
         
 
+
+
         self.menu_processor.setObjectName(u"menuProcessor")
         self.menu_processor.setEnabled(True)
-        
+
         self.menu_processor.addActions([
             self.menu_edit.menuAction(),
             self.actionCopy,
@@ -206,6 +217,8 @@ class _HBImageBoxUi(QWidget):
         self.menu_edit.setTitle(u"Edit")
         self.menu_flip.setTitle("Flip")
         self.menu_color.setTitle("Color")
+        self.menu_draw.setTitle("Draw")
+        
 
 
 
