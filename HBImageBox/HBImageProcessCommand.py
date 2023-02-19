@@ -170,6 +170,74 @@ class CommandDrawImage(CommandImageProcess):
 
 
 
+#=============================================================================================
+class CommandSplitImage(CommandImageProcess):
+    def __init__(self, _hb_image_box, direction:str):
+        if direction!="H" and direction!="V":
+            raise ValueError(f"direction's value should be 'H' or 'V', not {direction}")
+
+        super(CommandSplitImage, self).__init__(_hb_image_box, f"Split {direction}")
+        self.direction = direction
+        self.pre_image:'HBImage' = _hb_image_box.image
+        self.pre_zoom_scale = _hb_image_box.zoom_scale
+        self.split_pos = self._get_split_point()
+
+
+    def _get_split_point(self):
+        """ Computes the split point along the vertical or horizontal direction of an image
+        based on the region of interest (ROI) specified by self.pre_image. 
+
+        Returns:
+            split_pos(int) : The computed split point.
+        """
+        roi = self.pre_image.ROI
+        W, H = self.pre_image.size
+        tmp_point=(0,0)
+        img_bound=W
+        split_pos=0
+        
+        if self.direction=="V":
+            tmp_point = (roi[0],roi[2]) #roi's (x0,x1)
+            img_bound = W
+        elif self.direction=="H":
+            tmp_point = (roi[1],roi[3]) #roi's (y0,y1)
+            img_bound = H
+        else:
+            raise ValueError("Direction must be either 'V' or 'H'")
+
+        # If the sum of the coordinates of tmp_point is less than the image's width or height,
+        # the ROI is entirely contained in one half of the image.
+        # In this case, we choose the LB point as the split_pos.
+        if (tmp_point[0]+tmp_point[1])<img_bound:
+            split_pos = tmp_point[1]
+        elif (tmp_point[0]+tmp_point[1])>img_bound:
+            split_pos = tmp_point[0]
+        else:
+            split_pos = tmp_point[1]
+        
+        return split_pos
+        
+
+    def redo(self):
+        super().redo()
+        split_img0, split_img1 = self.pre_image.split(self.split_pos)
+        self.image_box._image = split_img0
+        #self.image_box
+        
+        if self.image_box.display_mode=="zoom":
+            self.image_box._scale_label_size(self.image_box.image.size, self.image_box.zoom_scale)
+
+        self.image_box.update_image_box()
+        self.image_box.hide_rubber_band()
+
+    def undo(self):
+        self.image_box._image = self.pre_image
+        if self.image_box.display_mode=="zoom":
+            self.image_box._scale_label_size(self.image_box.image.size, self.pre_zoom_scale)
+
+        self.image_box.update_image_box()
+        super().undo()
+
 
 
 

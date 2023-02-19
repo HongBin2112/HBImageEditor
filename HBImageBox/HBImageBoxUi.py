@@ -45,6 +45,8 @@ class _HBImageBoxUi(QWidget):
         self.set_widgets()
         self.set_menus()
 
+        
+
 
 
     def add_widgets(self):
@@ -64,6 +66,7 @@ class _HBImageBoxUi(QWidget):
         self.menu_flip = QMenu(self.menu_edit)
         self.menu_color = QMenu(self.menu_edit)
         self.menu_draw = QMenu(self.menu_edit)
+        self.menu_split = QMenu(self.menu_edit)
 
 
     def add_actions(self):
@@ -111,7 +114,13 @@ class _HBImageBoxUi(QWidget):
         self.actionSave.setObjectName(u"actionSave")
         
         self.actionDrawRect = QAction("Rect", self)
-        self.actionDrawRect.setObjectName(u"actionDrawRect")        
+        self.actionDrawRect.setObjectName(u"actionDrawRect")
+        
+        self.actionSpiltH = QAction("Horizontal",self)
+        self.actionSpiltH.setObjectName(u"actionSpiltH")
+
+        self.actionSpiltV = QAction("Vertical",self)
+        self.actionSpiltV.setObjectName(u"actionSpiltV")
 
 
     def set_actions(self):
@@ -162,7 +171,9 @@ class _HBImageBoxUi(QWidget):
         self.hb_image_box_label.setObjectName(u"HBImageBoxLabel")
         self.hb_image_box_label.setMinimumSize(QSize(300, 120))
         self.hb_image_box_label.setAlignment(Qt.AlignCenter)
-        
+
+
+
     def set_menus(self):
         self.menu_flip.setObjectName(u"menuFlip")
         self.menu_flip.addAction(self.actionHorizontal)
@@ -175,16 +186,21 @@ class _HBImageBoxUi(QWidget):
         self.menu_draw.setObjectName(u"menuDraw")
         self.menu_draw.addAction(self.actionDrawRect)
         
+        self.menu_split.setObjectName(u"menuSpilt")
+        self.menu_split.addAction(self.actionSpiltH)
+        self.menu_split.addAction(self.actionSpiltV)
+
 
         self.menu_edit.setObjectName(u"menuEdit")
         self.menu_edit.setEnabled(False)
-        
+
         self.menu_edit.addActions([
             self.actionCrop,
             self.actionRotate_90,
             self.menu_color.menuAction(),
             self.menu_draw.menuAction(),
-            self.menu_flip.menuAction()
+            self.menu_flip.menuAction(),
+            self.menu_split.menuAction()
         ])
         self.menu_edit.addSeparator()
         self.menu_edit.addActions([
@@ -218,6 +234,7 @@ class _HBImageBoxUi(QWidget):
         self.menu_flip.setTitle("Flip")
         self.menu_color.setTitle("Color")
         self.menu_draw.setTitle("Draw")
+        self.menu_split.setTitle("Split")
         
 
 

@@ -1,4 +1,6 @@
-from urllib.request import urlopen
+from os import path
+from urllib.request import urlopen,Request
+
 from PIL import (
     Image,
     ImageGrab,
@@ -13,6 +15,12 @@ from . import HBCommon
 
 #Decorator define
 def image_process(image_process_function):
+    """Decorator.\n
+    If ROI is set, the function only modified this region.
+
+    Args:
+        image_process_function (function): Decorated
+    """
     def do_process(self:'HBImage'):
         
         if self.is_ROI_empty:
@@ -225,7 +233,15 @@ class HBImage:
         - PIL.Image.Image or its subclass, then it is copied to self.image.
         """
         if isinstance(source, str):
-            self._image = Image.open(urlopen(source)) if (HBCommon.is_url(source)) else Image.open(source)
+            if HBCommon.is_url(source):
+                headers = {
+                    "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+                }
+                req = Request(source, headers=headers)
+                self._image = Image.open(urlopen(req))  
+            else: 
+                self._image = Image.open(source)
+
             self.information = {
                 "filename":HBCommon.get_file_basename(source),
                 "filepath":source,
@@ -241,18 +257,20 @@ class HBImage:
             self.information = kwargs
 
         else:
-            raise AttributeError(f"Cannot Load {type(source)}.")
+            raise TypeError(f"Cannot Load {type(source)}.")
 
         self._is_empty = False
 
-    def save(self, filepath, format = None):
+
+
+    def save(self, filepath, format = None, **kwargs):
         if format is None:
             self._image.save(filepath)
             return None
         
         name, name_format = HBCommon.get_file_name_and_format(filepath)
         new_filename = f"{name}.{format}"
-        self._image.save(new_filename, format)
+        self._image.save(new_filename, format, kwargs)
 
         
 
@@ -303,7 +321,40 @@ class HBImage:
         return hb_image
         
 
+    def split(self, pos:int, axis:str) -> list:
+        """Split an image into two images along a line
 
+        This function splits an image into two separate images, based on the line
+        defined by `axis=pos`.\n
+        For example, if `pos=300` and `axis="x"`, the
+        image will be split along the line `x=300` and the two resulting images
+        will be `image0=self.crop((0,0,pos,h))` and `image1=self.crop((pos,0,w,h))`.
+
+        Args:
+            pos (int): The index at which to split the image.
+            axis (str): Either "x" or "y". Specifies the axis along which to split the image.
+
+        Returns:
+            List[HBimage, HBimage]: A list containing the two resulting images.
+
+        Raises:
+            ValueError: If `axis` is not "x" or "y".
+        """
+
+        w,h = self.size
+        if axis == 'y':
+            box0 = (0,0,w,pos)
+            box1 = (0,pos,w,h)
+        elif axis == 'x':
+            box0 = (0,0,pos,h)
+            box1 = (pos,0,w,h)
+        else:
+            raise ValueError('axis must be either "x" or "y"')
+        
+        hbimage0 = self.crop(box0)
+        hbimage1 = self.crop(box1)
+            
+        return [hbimage0, hbimage1]
 
     def to_qt(self):
         """

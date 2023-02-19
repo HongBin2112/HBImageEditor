@@ -1,3 +1,4 @@
+import os
 import threading
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -22,7 +23,7 @@ class HBAlbum:
         elif isinstance(other,HBImage):
             self.append(other)
         else:
-            raise AttributeError(f"{type(other)} cannot be added to the HBAlbum.")
+            raise TypeError(f"{type(other)} cannot be added to the HBAlbum.")
         
         
     def __len__(self):
@@ -33,7 +34,7 @@ class HBAlbum:
     
     def __setitem__(self, key, value):
         if not isinstance(value,HBImage):
-            raise AttributeError(f"{type(value)} cannot be added to the HBAlbum.")
+            raise TypeError(f"{type(value)} cannot be added to the HBAlbum.")
         self._album[key] = value
 
     def __iter__(self):
@@ -69,15 +70,18 @@ class HBAlbum:
     
     def append(self, hb_image:HBImage):
         if hb_image.is_empty:
-            raise AttributeError(f"Append Nothing!")
+            raise ValueError(f"Append Nothing!")
         self._album.append(hb_image)
         
     def merge(self, hb_album:'HBAlbum'):
         self._album.extend(hb_album)
+        
+    def extend(self, hb_album:'HBAlbum'):
+        self._album.extend(hb_album)
     
     def delete(self, index):
         if self.bookmark==(self.length-1):
-            self.bookmark = self.length - 2
+            self.bookmark -= 1
         self._album[index].image.close()
         del self._album[index]
 
@@ -88,7 +92,9 @@ class HBAlbum:
         if index>=self.bookmark:
             self.bookmark += 1
 
-    def save(self, folder_path:str, filename_prefix=None, format:str=None):
+    def save(self, folder_path:str, format:str=None, filename_prefix=None):
+        if self.is_empty:
+            raise FileNotFoundError("There is no Image.")
         HBCommon.create_folder(folder_path)
 
         save_threads = []
@@ -109,7 +115,20 @@ class HBAlbum:
             t.start()
         for t in save_threads:
             t.join()
-            
+
+
+    def save_to_pdf(self, filepath):
+        if self.is_empty:
+            raise IndexError("There is no image.")
+        
+        pil_images = [hbimg.image for hbimg in self._album]
+
+        if len(self._album)>1:  
+            pil_images[0].save(filepath, format="pdf", save_all=True, append_images=pil_images[1:])
+        else:
+            pil_images[0].save(filepath, format="pdf", save_all=True)
+ 
+ 
     def _save_single_image(self, folder_path:str, filename_prefix=None, format:str=None):
         pass
 
@@ -121,39 +140,70 @@ class HBAlbum:
         for filepath in filepaths_list:
             self.append(HBImage(filepath))
 
-    
-    def load(self, source):
-        """"""
-        if isinstance(source, list):
-            if isinstance(source[0], str):
-                self.load_from_filepaths(source)
-            elif isinstance(source[0], HBImage):
-                self._album = source
-            else:
-                raise AttributeError(f"{type(source)} cannot be added to the HBAlbum.")
-        
-        elif isinstance(source, str):
-            """
-            If source is a txt file, assume it contain the images' url.
-            Read file into list[urls], then use these urls call function:"load_from_filepaths".
-            """
-            if HBCommon.get_file_format(source)=="txt":
-                self.load_from_filepaths(HBCommon.load_file_txt(source))
 
+    def load(self, source):
+        """Loads images into the HBAlbum from a source."""
+
+        if isinstance(source, list):
+            self._load_from_list(source)
+        elif isinstance(source, str):
+            self._load_from_str(source)
+        else:
+            raise TypeError(f"{type(source)} cannot be added to the HBAlbum.")
+
+
+    def _load_from_list(self, source:list):
+        """Only accept two type list: str and HBImage."""
+
+        if isinstance(source[0], str):
+            self.load_from_filepaths(source)
+        elif isinstance(source[0], HBImage):
+            self._album = source
+        else:
+            raise TypeError(f"{type(source)} cannot be added to the HBAlbum.")
+
+
+    def _load_from_str(self, source:str):
+        """Loads images into the HBAlbum from a string source. \n
+        If source is a txt file, assume it contain the images' url.
+        """
+        if not os.path.exists(source):
+            raise FileNotFoundError(f"FileNotFoundError : {source}")
+        if HBCommon.get_file_format(source) == "txt":
+            self.load_from_filepaths(HBCommon.load_file_txt(source))
+        else:
+            self._load_from_folder(source)
+
+
+    def _load_from_folder(self, folder_path:str):
+        if not isinstance(folder_path, str):
+            raise TypeError(f"Folder path must be a string. Not {type(folder_path)}")
+        if not os.path.exists(folder_path):
+            raise FileNotFoundError("Folder not found.")
+        if not os.path.isdir(folder_path):
+            raise NotADirectoryError("The specified path is not a folder.")
+        
+        relative_filepaths_list = HBCommon.list_folder_files(folder_path)
+
+        if not relative_filepaths_list:
+            raise FileNotFoundError("No files found in the folder.")
+
+        filepaths_list = [f"{folder_path}/{filepath}" for filepath in relative_filepaths_list]
+        
+        self.load_from_filepaths(filepaths_list)
     
 
     def load_from_filepaths(self, filepaths_list:List[str]):
         if not filepaths_list:
             return None
+
         self._load_fail = []
-        #self._album = [None]*len(filepaths_list)
-
         with ThreadPool() as p:
-            self._album = p.map(self._get_load_from_filepath, filepaths_list)
+            self._album = p.map(self._load_from_filepath, filepaths_list)
 
 
 
-    def _get_load_from_filepath(self, filepath:str):
+    def _load_from_filepath(self, filepath:str) -> 'HBImage':
         if not filepath:
             return None
 

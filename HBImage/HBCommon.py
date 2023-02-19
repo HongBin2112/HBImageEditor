@@ -1,6 +1,10 @@
-import re, os
-from functools import wraps
+import os
+import re
 import time
+
+from os.path import isfile, join
+from functools import wraps
+
 
 
 
@@ -65,6 +69,32 @@ def limit_number(x, lower, upper):
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
+
+
+def list_folder_files(folder_path:str) -> list:
+    """Only return the files' relative path, not include folders.
+
+    Args:
+        folder_path (str)
+
+    Returns:
+        List[str]: a list of files' path.(relative path)
+    """
+    files = [f for f in os.listdir(folder_path) if isfile(join(folder_path, f))]
+    return sorted(files, key=natural_sort_key)
+
+
+
+#"natural_sort_key" 
+def natural_sort_key(string):
+    """\"Write by ChatGPT\"\n
+    How to use:\n
+    sorted_strings = sorted(strings, key=natural_sort_key)
+
+    """
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string)]
+
+
 
 
 

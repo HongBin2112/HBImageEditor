@@ -25,4 +25,3 @@ if __name__ == "__main__":
     HBIP_window = HBMainWindow()
     HBIP_window.show()
     app.exec()
-
